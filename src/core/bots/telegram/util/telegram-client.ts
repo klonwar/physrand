@@ -255,7 +255,7 @@ class TelegramClient extends TelegramBot {
       docForTeacher.render({
         ...this.getRandomizedValues(firstEmptyColumn, `clear`),
         ...this.users.get(msg.chat.id).userAnswer ?? {},
-        imt: this.users.get(msg.chat.id).imt,
+        imt: this.users.get(msg.chat.id).imt.toFixed(2),
       });
 
       docForBot.render({
