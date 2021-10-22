@@ -269,7 +269,6 @@ class TelegramClient extends TelegramBot {
       const bufForBot = docForBot.getZip().generate({type: `nodebuffer`});
 
       const date = moment().format(`DD.MM`);
-      const next_date = moment().add(7, `d`).format(`DD.MM`);
 
       await this.sendMessage(
         msg.chat.id,
@@ -290,7 +289,7 @@ class TelegramClient extends TelegramBot {
         msg.chat.id,
         bufForBot,
         {},
-        {filename: `next_template_${next_date}.docx`}
+        {filename: `next_template.docx`}
       );
 
       // Удаляем скачанный файл
