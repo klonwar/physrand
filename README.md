@@ -1,2 +1,13 @@
-# physrand
-Randomize your self-control diary. Actual for VSU students for 2021
+# vsu-svg-grabber
+
+С помощью данной утилиты вы можете рандомизировать "Дневник самоконтроля"
+
+## Установка и запуск
+
+1. `npm i`
+2. Создайте `.env` файл и укажите в нем токен для телеграм-бота
+
+```dotenv
+TELEGRAM_TOKEN= "... : ..."
+```
+3. `npm run start`
