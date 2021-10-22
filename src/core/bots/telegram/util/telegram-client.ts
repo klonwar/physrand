@@ -268,6 +268,9 @@ class TelegramClient extends TelegramBot {
       const bufForTeacher = docForTeacher.getZip().generate({type: `nodebuffer`});
       const bufForBot = docForBot.getZip().generate({type: `nodebuffer`});
 
+      const date = moment().format(`DD.MM`);
+      const next_date = moment().add(7, `d`).format(`DD.MM`);
+
       await this.sendMessage(
         msg.chat.id,
         `Отправлять в мудл:`
@@ -276,7 +279,7 @@ class TelegramClient extends TelegramBot {
         msg.chat.id,
         bufForTeacher,
         {},
-        {filename: `Дневник самоконтроля.docx`}
+        {filename: `Дневник самоконтроля_${date}.docx`}
       );
 
       await this.sendMessage(
@@ -287,7 +290,7 @@ class TelegramClient extends TelegramBot {
         msg.chat.id,
         bufForBot,
         {},
-        {filename: `next_template.docx`}
+        {filename: `next_template_${next_date}.docx`}
       );
 
       // Удаляем скачанный файл
