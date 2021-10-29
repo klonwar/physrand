@@ -224,53 +224,36 @@ class TelegramClient extends TelegramBot {
 
       const filepath = await this.downloadFile(msg.document.file_id, `${dir}`);
       const file1 = await fs.promises.readFile(filepath);
-      const file2 = await fs.promises.readFile(filepath);
       const zip1 = pizzip(file1);
-      const zip2 = pizzip(file2);
 
       const docForTeacher = new Docxtemplater(zip1, {
         paragraphLoop: true,
         linebreaks: true,
       });
 
-      const docForBot = new Docxtemplater(zip2, {
-        paragraphLoop: true,
-        linebreaks: true,
-      });
 
       // Первая колонка без текста
       let firstEmptyColumn = 1;
-      while (docForBot.getFullText().indexOf(`{${firstEmptyColumn}_0_1}`) === -1) {
+      while (docForTeacher.getFullText().indexOf(`{${firstEmptyColumn}_0_1}`) === -1) {
         firstEmptyColumn++;
         if (firstEmptyColumn > 100) {
           await this.sendMessage(
             msg.chat.id,
-            `Ваш файл не является темплейтом. Скачайте пустой командой /template и отправьте его сюда. Если вы уже пользовались ботом, то отправьте последний next_template.docx`
+            `Ваш файл не является темплейтом. Скачайте пустой командой /template и отправьте его сюда`
           );
           return;
         }
 
       }
 
-      const columnValues = this.getRandomizedValuesForColumn(firstEmptyColumn);
-
       docForTeacher.render({
-        ...this.setValuesMode(columnValues, firstEmptyColumn, `clear`),
+        ...this.generateFullTable(firstEmptyColumn),
         ...this.users.get(msg.chat.id).userAnswer ?? {},
         imt: this.users.get(msg.chat.id).imt.toFixed(2),
       });
 
-      docForBot.render({
-        ...this.setValuesMode(columnValues, firstEmptyColumn, `save`),
-        ...this.users.get(msg.chat.id).userAnswer ?? {},
-        imt: this.users.get(msg.chat.id).imt.toFixed(2)
-      });
-
 
       const bufForTeacher = docForTeacher.getZip().generate({type: `nodebuffer`});
-      const bufForBot = docForBot.getZip().generate({type: `nodebuffer`});
-
-      const date = moment().format(`DD.MM`);
 
       await this.sendMessage(
         msg.chat.id,
@@ -280,18 +263,12 @@ class TelegramClient extends TelegramBot {
         msg.chat.id,
         bufForTeacher,
         {},
-        {filename: `Дневник самоконтроля_${date}.docx`}
+        {filename: `Дневник самоконтроля_FULL.docx`}
       );
 
       await this.sendMessage(
         msg.chat.id,
-        `Отправлять в бота для генерации следующего столбца:`
-      );
-      await this.sendDocument(
-        msg.chat.id,
-        bufForBot,
-        {},
-        {filename: `next_template.docx`}
+        `Удалите ненужные столбцы каждый раз перед отправкой в мудл. Не забудьте проставить даты`
       );
 
       // Удаляем скачанный файл
@@ -299,23 +276,12 @@ class TelegramClient extends TelegramBot {
     });
   }
 
-  setValuesMode(columnValues: any, column: number, mode: `clear` | `save`): Record<string, any> {
-    const values = {
-      ...columnValues
-    };
+  generateFullTable(fromColumn: number): Record<string, any> {
+    let values = {};
 
     // Сгенерим все остальное
-    for (let i = 1; i <= 26; i++) {
-      if (i !== column) {
-        for (let j = 0; j <= 10; j++) {
-          for (let k = 1; k <= 4; k++) {
-            if (mode === `clear`)
-              values[`${i}_${j}_${k}`] = ``;
-            else
-              values[`${i}_${j}_${k}`] = `{${i}_${j}_${k}}`;
-          }
-        }
-      }
+    for (let i = fromColumn; i <= 26; i++) {
+      values = {...values, ...this.getRandomizedValuesForColumn(i)};
     }
 
     return values;
@@ -331,7 +297,7 @@ class TelegramClient extends TelegramBot {
     let block = 0;
 
     // Дата
-    values[`${i}_${block}_` + `1`] = date; // вдох
+    values[`${i}_${block}_` + `1`] = ``;
     block++;
 
     // Дл-ть задержки дыхания
@@ -347,7 +313,7 @@ class TelegramClient extends TelegramBot {
     block++;
 
     // Дата
-    values[`${i}_${block}_` + `1`] = date;
+    values[`${i}_${block}_` + `1`] = ``;
     block++;
 
     // Общее сам-ие, настроение, сон, аппетит
