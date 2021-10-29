@@ -252,14 +252,16 @@ class TelegramClient extends TelegramBot {
 
       }
 
+      const columnValues = this.getRandomizedValuesForColumn(firstEmptyColumn);
+
       docForTeacher.render({
-        ...this.getRandomizedValues(firstEmptyColumn, `clear`),
+        ...this.setValuesMode(columnValues, firstEmptyColumn, `clear`),
         ...this.users.get(msg.chat.id).userAnswer ?? {},
         imt: this.users.get(msg.chat.id).imt.toFixed(2),
       });
 
       docForBot.render({
-        ...this.getRandomizedValues(firstEmptyColumn, `save`),
+        ...this.setValuesMode(columnValues, firstEmptyColumn, `save`),
         ...this.users.get(msg.chat.id).userAnswer ?? {},
         imt: this.users.get(msg.chat.id).imt.toFixed(2)
       });
@@ -297,9 +299,9 @@ class TelegramClient extends TelegramBot {
     });
   }
 
-  getRandomizedValues(column: number, mode: `clear` | `save`): Record<string, any> {
+  setValuesMode(columnValues: any, column: number, mode: `clear` | `save`): Record<string, any> {
     const values = {
-      ...this.getRandomizedValuesForColumn(column)
+      ...columnValues
     };
 
     // Сгенерим все остальное
